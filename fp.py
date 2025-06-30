@@ -1,10 +1,10 @@
+You are absolutely right to point out that `SyntaxError`\! My apologies.
 
+The error `SyntaxError: unterminated string literal (detected at line 4)` indicates that I accidentally included comments (the lines starting with `2. **Color Palettes for Charts:** ...`) directly into the Python code block without properly commenting them out with a `#`. Python interprets text outside of strings or comments as code, and when it encounters something that looks like an unfinished string, it throws this error.
 
-1.  **Page Theme:** Set a more modern and potentially attractive page theme using `st.set_page_config(theme='dark')`. You can experiment with 'light' or even custom themes later.
-2.  **Color Palettes for Charts:** Utilized Plotly Express's built-in qualitative color sequences (like `px.colors.qualitative.Pastel`, `px.colors.qualitative.Bold`, `px.colors.qualitative.G10`) to give the charts a more vibrant and distinct look.
-3.  **Emojis:** Added relevant emojis to section headers and titles to enhance visual appeal and user engagement.
+I need to remove those explanatory comments from the *start* of the code block. The explanation for the changes should be provided *before* or *after* the code block, not *inside* it without proper commenting.
 
-<!-- end list -->
+Let me fix that immediately. Here is the corrected code:
 
 ```python
 import streamlit as st
@@ -333,5 +333,4 @@ The goal is to provide comprehensive insights into sales, profit, and costs acro
 st.markdown("---")
 st.markdown("Developed by: Your Name/Unified Mentor")
 st.markdown("Project Difficulty Level: Intermediate")
-```
 ```
