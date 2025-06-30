@@ -156,7 +156,6 @@ if not filtered_df.empty:
         st.metric(label="Gross Profit", value=f"${gross_profit:,.2f}")
     
     with col5:
-        # Net Profit calculation corrected based on 'Profit' and 'Discounts' column values
         net_profit_calc = filtered_df['Profit'].sum() - filtered_df['Total Discounts'].sum()
         st.metric(label="Net Profit", value=f"${net_profit_calc:,.2f}")
 else:
@@ -180,7 +179,7 @@ if not filtered_df.empty:
             'Operating Expenses': year_df['Operating Expenses'].sum() if 'Operating Expenses' in year_df.columns else 0,
             'EBITDA': year_df['Profit'].sum(), 
             'Operating Profit': year_df['Profit'].sum(), 
-            'Net Profit': year_df['Profit'].sum() - year_df['Total Discounts'].sum() # Corrected here
+            'Net Profit': year_df['Profit'].sum() - year_df['Total Discounts'].sum()
         }
     
     pnl_df = pd.DataFrame(pnl_data).rename_axis('Account').reset_index()
@@ -197,7 +196,6 @@ col_vis1, col_vis2 = st.columns(2)
 with col_vis1:
     st.markdown("### Sales | Gross Profit | Net Profit Trend Over Time")
     if not filtered_df.empty:
-        # Ensure correct column names are used after cleaning
         sales_profit_over_time = filtered_df.groupby('Year')[['Sales', 'Gross Sales', 'Profit']].sum().reset_index()
         fig_line = px.line(sales_profit_over_time, x='Year', y=['Sales', 'Gross Sales', 'Profit'],
                           title='Sales, Gross Profit, and Net Profit Trend Over Time',
@@ -211,7 +209,6 @@ with col_vis1:
 with col_vis2:
     st.markdown("### Sales | GP | NP by Country")
     if not filtered_df.empty:
-        # Ensure correct column names are used after cleaning
         sales_profit_by_country = filtered_df.groupby('Country')[['Sales', 'Gross Sales', 'Profit']].sum().reset_index()
         fig_bar_country = px.bar(sales_profit_by_country, x='Country', y=['Sales', 'Gross Sales', 'Profit'],
                                  barmode='group',
@@ -246,7 +243,6 @@ with col_vis3:
 
 with col_vis4:
     st.markdown("### Sales and Marketing Expenses Trend")
-    # Check if 'Operating Expenses' column exists and has data before plotting
     if not filtered_df.empty and 'Operating Expenses' in filtered_df.columns and not filtered_df['Operating Expenses'].isnull().all():
         expenses_over_time = filtered_df.groupby('Year')['Operating Expenses'].sum().reset_index()
         fig_expenses = px.area(expenses_over_time, x='Year', y='Operating Expenses',
@@ -275,7 +271,6 @@ st.markdown("---")
 
 st.markdown("### Sales by Product and Discount Band (Heat Map)")
 if not filtered_df.empty:
-    # Ensure columns are clean before pivoting
     heatmap_data = filtered_df.pivot_table(index='Product', columns='Discount Band', values='Sales', aggfunc='sum')
     
     plt.figure(figsize=(12, 8))
@@ -286,6 +281,40 @@ if not filtered_df.empty:
     st.pyplot(plt)
 else:
     st.info("No data for Sales by Product and Discount Band Heat Map.")
+
+# --- NEW SEGMENT: Financial Performance Enhancement Tips ---
+st.markdown("---")
+st.markdown("## Financial Performance Enhancement Tips :bulb:")
+
+with st.expander("Click to view actionable tips"):
+    st.markdown("""
+    Here are some general strategies and tips that can help improve financial performance based on common business analysis:
+
+    ### 📈 **Revenue Growth Strategies:**
+    * **Expand Market Reach:** Explore new countries or segments that show high potential for your products.
+    * **Product Diversification:** Introduce new products or enhance existing ones to meet evolving customer needs.
+    * **Pricing Optimization:** Regularly review and adjust pricing strategies to ensure competitiveness and maximize revenue without alienating customers.
+    * **Upselling/Cross-selling:** Encourage customers to purchase higher-value items or complementary products.
+
+    ### 💰 **Profitability Improvement:**
+    * **Cost of Goods Sold (COGS) Reduction:** Negotiate better deals with suppliers, optimize manufacturing processes, or explore alternative, cheaper raw materials without compromising quality.
+    * **Improve Efficiency:** Streamline operations to reduce waste and increase productivity, which directly impacts profit margins.
+    * **Strategic Discounting:** Analyze the "Sales by Product and Discount Band" heatmap carefully. Are high discounts truly driving proportionally higher sales and profit? If not, re-evaluate your discount strategy to protect margins.
+    * **Focus on High-Profit Products/Segments:** Identify your most profitable products and segments and allocate more resources to them.
+
+    ### 💸 **Cost Optimization:**
+    * **Operating Expense Review:** Regularly audit your operating expenses (e.g., Sales and Marketing Expenses, Administrative Costs) to identify areas for reduction without impacting core business functions.
+    * **Technology Adoption:** Invest in technologies that automate tasks, reduce manual labor, and improve overall efficiency, leading to long-term cost savings.
+    * **Energy Efficiency:** Implement energy-saving measures to reduce utility costs.
+
+    ### 📊 **Data-Driven Decision Making:**
+    * **Continuous Monitoring:** Regularly review this dashboard to identify trends, opportunities, and potential issues early.
+    * **Variance Analysis:** Compare actual performance against budgeted or previous period's performance to understand deviations and their causes.
+    * **Customer Lifetime Value (CLTV):** Focus on retaining high-value customers, as customer acquisition can be more expensive than retention.
+
+    By consistently applying these principles and leveraging the insights from this dashboard, you can drive sustainable financial growth and improve overall business health.
+    """)
+
 
 # --- Information/About Section ---
 st.markdown("---")
