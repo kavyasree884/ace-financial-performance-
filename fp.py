@@ -20,8 +20,21 @@ def load_data():
         df = pd.read_csv("financial_data.csv")
         
         # --- Data Preparation as per Project Objective ---
+        # 1. Clean column names: strip whitespace
+        df.columns = df.columns.str.strip()
+        
+        # 2. Convert numerical columns, handling '$' and commas
+        currency_cols = ['Units Sold', 'Manufacturing Price', 'Sale Price', 
+                         'Gross Sales', 'Discounts', 'Sales', 'COGS', 'Profit']
+        
+        for col in currency_cols:
+            if col in df.columns:
+                # Remove '$', commas, and any extra spaces, then convert to numeric
+                df[col] = df[col].astype(str).str.replace('$', '', regex=False).str.replace(',', '', regex=False).str.strip()
+                # Handle empty strings or non-numeric values that might result from stripping
+                df[col] = pd.to_numeric(df[col], errors='coerce')
+        
         # Ensure 'Date' column is parsed correctly, it might be in different formats in CSV
-        # Try a common format, if it fails, you might need to inspect your CSV date format.
         df['Date'] = pd.to_datetime(df['Date'], errors='coerce') # 'coerce' will turn unparseable dates into NaT
         df.dropna(subset=['Date'], inplace=True) # Remove rows where Date couldn't be parsed
         
@@ -30,13 +43,14 @@ def load_data():
         df['Quarter'] = df['Date'].dt.quarter.apply(lambda x: f'Qtr {x}')
 
         # Create Calculated Fields
-        df['Profit Margin'] = df['Profit'] / df['Sales']
-        df['Total Discounts'] = df['Discounts']
+        # Ensure Sales is not zero to avoid division by zero
+        df['Profit Margin'] = df['Profit'] / df['Sales'].replace(0, pd.NA) # Use pd.NA for cleaner division by zero
+        df['Total Discounts'] = df['Discounts'].abs() # Discounts are sometimes negative, take absolute for total
         df['Total Revenue (Gross Sales)'] = df['Gross Sales']
-        df['COGS to Sales'] = df['COGS'] / df['Sales']
-        df['Net Sales'] = df['Gross Sales'] - df['Discounts']
+        df['COGS to Sales'] = df['COGS'] / df['Sales'].replace(0, pd.NA) # Use pd.NA for cleaner division by zero
+        df['Net Sales'] = df['Gross Sales'] - df['Total Discounts'] # Use Total Discounts here
 
-        # Handle potential division by zero for ratios
+        # Handle potential division by zero for ratios (fill with 0 or NaN)
         df['Profit Margin'].fillna(0, inplace=True)
         df['COGS to Sales'].fillna(0, inplace=True)
 
@@ -142,7 +156,8 @@ if not filtered_df.empty:
         st.metric(label="Gross Profit", value=f"${gross_profit:,.2f}")
     
     with col5:
-        net_profit_calc = filtered_df['Profit'].sum() - filtered_df['Discounts'].sum()
+        # Net Profit calculation corrected based on 'Profit' and 'Discounts' column values
+        net_profit_calc = filtered_df['Profit'].sum() - filtered_df['Total Discounts'].sum()
         st.metric(label="Net Profit", value=f"${net_profit_calc:,.2f}")
 else:
     st.warning("No data available for the selected filters. Please adjust your selections.")
@@ -165,7 +180,7 @@ if not filtered_df.empty:
             'Operating Expenses': year_df['Operating Expenses'].sum() if 'Operating Expenses' in year_df.columns else 0,
             'EBITDA': year_df['Profit'].sum(), 
             'Operating Profit': year_df['Profit'].sum(), 
-            'Net Profit': year_df['Profit'].sum() 
+            'Net Profit': year_df['Profit'].sum() - year_df['Total Discounts'].sum() # Corrected here
         }
     
     pnl_df = pd.DataFrame(pnl_data).rename_axis('Account').reset_index()
@@ -182,6 +197,7 @@ col_vis1, col_vis2 = st.columns(2)
 with col_vis1:
     st.markdown("### Sales | Gross Profit | Net Profit Trend Over Time")
     if not filtered_df.empty:
+        # Ensure correct column names are used after cleaning
         sales_profit_over_time = filtered_df.groupby('Year')[['Sales', 'Gross Sales', 'Profit']].sum().reset_index()
         fig_line = px.line(sales_profit_over_time, x='Year', y=['Sales', 'Gross Sales', 'Profit'],
                           title='Sales, Gross Profit, and Net Profit Trend Over Time',
@@ -195,6 +211,7 @@ with col_vis1:
 with col_vis2:
     st.markdown("### Sales | GP | NP by Country")
     if not filtered_df.empty:
+        # Ensure correct column names are used after cleaning
         sales_profit_by_country = filtered_df.groupby('Country')[['Sales', 'Gross Sales', 'Profit']].sum().reset_index()
         fig_bar_country = px.bar(sales_profit_by_country, x='Country', y=['Sales', 'Gross Sales', 'Profit'],
                                  barmode='group',
@@ -229,7 +246,8 @@ with col_vis3:
 
 with col_vis4:
     st.markdown("### Sales and Marketing Expenses Trend")
-    if not filtered_df.empty and 'Operating Expenses' in filtered_df.columns:
+    # Check if 'Operating Expenses' column exists and has data before plotting
+    if not filtered_df.empty and 'Operating Expenses' in filtered_df.columns and not filtered_df['Operating Expenses'].isnull().all():
         expenses_over_time = filtered_df.groupby('Year')['Operating Expenses'].sum().reset_index()
         fig_expenses = px.area(expenses_over_time, x='Year', y='Operating Expenses',
                                title='Sales and Marketing Expenses Over Time',
@@ -237,7 +255,7 @@ with col_vis4:
                                color_discrete_sequence=['red'])
         st.plotly_chart(fig_expenses, use_container_width=True)
     else:
-        st.info("No 'Operating Expenses' column or data to display Sales and Marketing Expenses.")
+        st.info("No 'Operating Expenses' data to display Sales and Marketing Expenses.")
 
 st.markdown("---")
 
@@ -257,6 +275,7 @@ st.markdown("---")
 
 st.markdown("### Sales by Product and Discount Band (Heat Map)")
 if not filtered_df.empty:
+    # Ensure columns are clean before pivoting
     heatmap_data = filtered_df.pivot_table(index='Product', columns='Discount Band', values='Sales', aggfunc='sum')
     
     plt.figure(figsize=(12, 8))
