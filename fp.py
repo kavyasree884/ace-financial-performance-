@@ -327,4 +327,3 @@ The goal is to provide comprehensive insights into sales, profit, and costs acro
 st.markdown("---")
 st.markdown("Developed by: Your Name/Unified Mentor")
 st.markdown("Project Difficulty Level: Intermediate")
-```
