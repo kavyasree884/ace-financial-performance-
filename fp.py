@@ -1,6 +1,4 @@
 
-
-
 import streamlit as st
 import pandas as pd
 import plotly.express as px
@@ -8,18 +6,16 @@ import plotly.graph_objects as go
 import seaborn as sns
 import matplotlib.pyplot as plt
 
-# --- Page Configuration (Attractive Theme & Icon) ---
+# --- Page Configuration (Removed theme and icon for compatibility) ---
 st.set_page_config(
     page_title="Financial Performance Dashboard",
     layout="wide",
-    initial_sidebar_state="expanded",
-    # You can choose 'light' or 'dark' theme. 'dark' often looks more modern.
-    # For custom themes, you'd define them in config.toml or via st.markdown(unsafe_allow_html=True) with CSS
-    theme='dark',
-    icon="📈" # Adding a page icon
+    initial_sidebar_state="expanded"
+    # theme='dark', # Removed this line
+    # icon="📈" # Removed this line
 )
 
-# --- Load Data (Now reading from CSV) ---
+# --- Load Data ---
 @st.cache_data
 def load_data():
     try:
@@ -198,7 +194,7 @@ with col_vis1:
         fig_line = px.line(sales_profit_over_time, x='Year', y=['Sales', 'Gross Sales', 'Profit'],
                           title='Sales, Gross Profit, and Net Profit Trend Over Time',
                           labels={'value': 'Amount ($)', 'variable': 'Metric'},
-                          color_discrete_sequence=px.colors.qualitative.Bold) # Bold color palette
+                          color_discrete_sequence=px.colors.qualitative.Bold)
         fig_line.update_layout(hovermode="x unified")
         st.plotly_chart(fig_line, use_container_width=True)
     else:
@@ -212,7 +208,7 @@ with col_vis2:
                                  barmode='group',
                                  title='Sales, Gross Profit, and Net Profit by Country',
                                  labels={'value': 'Amount ($)', 'variable': 'Metric'},
-                                 color_discrete_sequence=px.colors.qualitative.Pastel) # Pastel color palette
+                                 color_discrete_sequence=px.colors.qualitative.Pastel)
         st.plotly_chart(fig_bar_country, use_container_width=True)
     else:
         st.info("ℹ️ No data for Sales, GP, NP by Country.")
@@ -234,7 +230,7 @@ with col_vis3:
         fig_kpi_trend = px.area(kpi_trend, x='Year', y=['Gross Profit', 'EBITDA', 'Operating Profit'],
                                 title='Gross Profit, EBITDA, Operating Profit Trend',
                                 labels={'value': 'Amount ($)', 'variable': 'Metric'},
-                                color_discrete_sequence=px.colors.qualitative.G10) # G10 color palette
+                                color_discrete_sequence=px.colors.qualitative.G10)
         st.plotly_chart(fig_kpi_trend, use_container_width=True)
     else:
         st.info("ℹ️ No data for Gross Profit, EBITDA, Operating Profit Trend.")
@@ -246,7 +242,7 @@ with col_vis4:
         fig_expenses = px.area(expenses_over_time, x='Year', y='Operating Expenses',
                                title='Sales and Marketing Expenses Over Time',
                                labels={'Operating Expenses': 'Amount ($)'},
-                               color_discrete_sequence=['firebrick']) # A distinct red for expenses
+                               color_discrete_sequence=['firebrick'])
         st.plotly_chart(fig_expenses, use_container_width=True)
     else:
         st.info("ℹ️ No 'Operating Expenses' data to display Sales and Marketing Expenses.")
@@ -261,7 +257,7 @@ if not filtered_df.empty:
                              hover_data=['Country', 'Segment'],
                              title='Gross Sales vs Discounts by Product',
                              labels={'Gross Sales': 'Gross Sales ($)', 'Discounts': 'Discounts ($)'},
-                             color_discrete_sequence=px.colors.qualitative.Set2) # Another qualitative palette
+                             color_discrete_sequence=px.colors.qualitative.Set2)
     st.plotly_chart(fig_scatter, use_container_width=True)
 else:
     st.info("ℹ️ No data for Gross Sales vs Discounts Scatter Plot.")
@@ -273,7 +269,7 @@ if not filtered_df.empty:
     heatmap_data = filtered_df.pivot_table(index='Product', columns='Discount Band', values='Sales', aggfunc='sum')
     
     plt.figure(figsize=(12, 8))
-    sns.heatmap(heatmap_data, annot=True, fmt=".0f", cmap="YlGnBu", linewidths=.5, linecolor='black') # YlGnBu is a good sequential cmap
+    sns.heatmap(heatmap_data, annot=True, fmt=".0f", cmap="YlGnBu", linewidths=.5, linecolor='black')
     plt.title('Sales by Product and Discount Band', fontsize=16)
     plt.xlabel('Discount Band', fontsize=12)
     plt.ylabel('Product', fontsize=12)
@@ -327,3 +323,4 @@ The goal is to provide comprehensive insights into sales, profit, and costs acro
 st.markdown("---")
 st.markdown("Developed by: Your Name/Unified Mentor")
 st.markdown("Project Difficulty Level: Intermediate")
+
