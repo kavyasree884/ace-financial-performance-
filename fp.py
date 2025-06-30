@@ -1,6 +1,4 @@
-Here's the updated Streamlit code with attractive and colorful changes, along with the tips and suggestions segment you previously requested.
 
-I've focused on:
 
 1.  **Page Theme:** Set a more modern and potentially attractive page theme using `st.set_page_config(theme='dark')`. You can experiment with 'light' or even custom themes later.
 2.  **Color Palettes for Charts:** Utilized Plotly Express's built-in qualitative color sequences (like `px.colors.qualitative.Pastel`, `px.colors.qualitative.Bold`, `px.colors.qualitative.G10`) to give the charts a more vibrant and distinct look.
